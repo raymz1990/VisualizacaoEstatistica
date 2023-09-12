@@ -1,8 +1,12 @@
 ---
+title: ""
 output:
-  word_document: default
-  pdf_document: default
-  html_document: default
+  html_document:                    
+    highlight: espresso
+    fig_width: 7                    
+    fig_height: 6                   
+    fig_caption: true               
+    fig_align: 'center'
 ---
 
 
