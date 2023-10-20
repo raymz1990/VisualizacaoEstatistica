@@ -1,0 +1,166 @@
+---
+title: "LAB07"
+output: html_document
+date: "2023-10-10"
+---
+
+
+## LAYOUT EM GGPLOT 
+
+
+### Instalando novas fontes 
+```{r  warning=F, message=F}
+#NOVAS FONTS NO R
+require(extrafont)
+# font_import() "instalar as fontes do seu computador para o R"
+#fonts()
+```
+
+### Criando gráficos com temas específicos
+```{r warning=F, message=F}
+require(dplyr)
+require(ggplot2)
+set.seed(1)
+#ENTRADA DE DADOS
+y1 <- round(rnorm(n = 36, mean = 7, sd = 2)) 
+y2 <- round(rnorm(n = 36, mean = 21, sd = 6))
+y3 <- round(rnorm(n = 36, mean = 50, sd = 8))
+x <- sample(c(LETTERS[1:12],LETTERS[1:3]), 36,rep=T)
+grp <- rep(c("G1", "G2", "G3"), each = 12)
+dados <- data.frame(grp, x, y1, y2, y3)
+
+
+#DEFININDO TEMAS
+COR.1="#C1BBD2"
+COR.2="#39237D"
+
+meutema <- function(){
+  theme_bw()+
+  theme(
+    axis.title = element_text(size=20, family = "Rockwell",colour=COR.2), 
+    axis.text = element_text(size=20, family = "Rockwell",colour=COR.1),
+    plot.title = element_text(size=30, family = "Rockwell",colour=COR.1,face="bold",hjust=0.5),
+    plot.background = element_rect(fill=NA,colour=NA),
+    panel.background = element_rect(fill=NA,colour=NA),
+    axis.ticks = element_line(colour=COR.1,size=10),
+    strip.background = element_rect(fill=COR.1),
+    strip.text=element_text(family="Rockwell",size=15))
+}
+
+#GRÁFICO 1
+tabela <- data.frame(VALORES=sort(table(x)))
+
+g1 <- tabela %>% ggplot(aes(x=VALORES.x,y=VALORES.Freq))+
+  geom_bar(stat='identity',fill=COR.2)+
+  coord_flip()+
+  xlab("Categorias")+
+  ylab("Frequência")+
+  ggtitle("Gráfico 1")+
+  meutema()
+
+#GRÁFICO 2
+g2 <- dados %>% ggplot(aes(x=y1,y=y2))+
+  geom_point(size=5,colour=COR.2)+
+  ggtitle("Gráfico 2")+
+  xlab("Variável 1")+
+  ylab("Variável 2")+
+  meutema()
+
+#GRÁFICO 3
+g3 <- dados %>% ggplot(aes(x=y3))+
+  geom_density(fill=COR.2)+
+  facet_grid(facets=.~grp)+
+  coord_flip()+
+  ggtitle("Gráfico 3")+
+  ylab("Densidade")+
+  xlab("Variável 3")+
+  meutema()+
+  theme(axis.text.x = element_text(size=10, family = "Rockwell",colour=COR.1))
+
+#GRÁFICO 4
+g4 <- dados %>% ggplot(aes(x=x,y=y2))+
+  geom_boxplot(fill=COR.2,colour=COR.1)+
+  ggtitle("Gráfico 4")+
+  ylab("Variável 2")+
+  xlab("")+
+  meutema()
+
+```
+
+### Criando layout de painel final
+
+```{r warning=F, message=F}
+##VERIFICAR SEU WORKING DIRECTORY (WD)
+setwd("D:\\ARA\\2023\\DISCIPLINAS\\MAT303\\")
+
+#IMPORTANDO IMAGENS
+require(png)
+require(grid)
+
+imag1 <- readPNG("bk.png")
+im1<- rasterGrob(imag1,width = unit(297,"mm"), height = unit(420,"mm"))
+
+imag2 <- readPNG("logo1.png")
+im2 <- rasterGrob(imag2,width = unit(140,"mm"), height = unit(80,"mm"))
+
+#CRIANDO IMAGEM
+png("painel.png", width = 297 , height = 420, units = "mm", res = 500)
+
+#CONSTRUIR UM NOVO GRID
+grid.newpage() 
+
+#CABEÇALHO E TEXTOS
+pushViewport(viewport(layout = grid.layout(1, 1)))
+print(grid.draw(im1))
+
+
+
+grid.text("CE303 2023.2", 
+          x = unit(297/2+10, "mm"), 
+          y = unit(390, "mm"), hjust=1, 
+          gp = gpar(fontfamily = "Rockwell", col = COR.2, 
+                    cex = 4))
+
+grid.text("PROF. ANDERSON ARA", 
+          x = unit(297/2+10, "mm"),  
+          y = unit(370, "mm"), hjust=1, 
+          gp = gpar(fontfamily = "Rockwell", col = COR.1, 
+                    cex = 2.7))
+
+grid.text("Universidade Federal do Paraná", 
+          x = unit(297/2+10, "mm"),  
+          y = unit(350, "mm"), hjust=1, 
+          gp = gpar(fontfamily = "Rockwell", col = COR.2,
+                    cex = 2))
+
+grid.text("Curitiba, 10 de outubro de 2023", 
+          x = unit(297/2+10, "mm"),  
+          y = unit(340, "mm"), hjust=1, 
+          gp = gpar(fontfamily = "Rockwell", col = COR.1, 
+                    cex = 2))
+
+#INCLUINDO GRÁFICOS
+pushViewport(viewport(layout = grid.layout(4, 14)))
+print(g1, vp = viewport(layout.pos.row=2:3, layout.pos.col = 2:7))
+print(g2, vp = viewport(layout.pos.row=2, layout.pos.col = 8:13))
+print(g3, vp = viewport(layout.pos.row=3, layout.pos.col = 8:13))
+print(g4, vp = viewport(layout.pos.row=4, layout.pos.col = 2:13))
+
+
+#INCLUINDO RLOGO
+pushViewport(viewport(layout.pos.row=1, layout.pos.col = 8:14))
+print(grid.draw(im2))
+
+dev.off()
+```
+
+### Resultado Final
+
+```{r echo=FALSE, out.width="70%", fig.align='center'}
+knitr::include_graphics("D:\\ARA\\2023\\DISCIPLINAS\\MAT303\\painel.png")
+```
+
+
+
+
+
